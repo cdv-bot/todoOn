@@ -8,10 +8,9 @@ class Todo extends Component {
   constructor(props) {
     super(props);
     this.focusRef = React.createRef();
-    this.c = JSON.parse(localStorage.getItem("list"));
-
+    let list = JSON.parse(localStorage.getItem("list"));
     this.state = {
-      num: this.c || [],
+      num: list || [],
       toggle: {
         check: true,
         id: null
@@ -21,11 +20,17 @@ class Todo extends Component {
     }
   }
 
+  pushArr = arrs => {
+    let a = JSON.stringify(arrs);
+    localStorage.setItem('list', a);
+  }
 
+  // thêm value
   handlerValues = x => {
+    const { num } = this.state;
     let c = JSON.parse(localStorage.getItem("list"));
 
-    if (c === null) {
+    if (num.length === 0) {
       let arr = [];
       let id = 1;
       let obj = {
@@ -35,8 +40,7 @@ class Todo extends Component {
       }
       arr.push(obj);
 
-      let a = JSON.stringify(arr);
-      localStorage.setItem('list', a);
+      this.pushArr(arr);
 
       this.setState({
         num: arr
@@ -52,8 +56,9 @@ class Todo extends Component {
         check: false
       }
       arr.push(obj);
-      let a = JSON.stringify(arr);
-      localStorage.setItem('list', a);
+
+      this.pushArr(arr);
+
       this.setState({
         num: arr
       });
@@ -61,6 +66,7 @@ class Todo extends Component {
     }
   }
 
+  //hoàn thành
   handlerCheck = id => {
     let c = JSON.parse(localStorage.getItem("list"));
 
@@ -88,11 +94,11 @@ class Todo extends Component {
       ...arrs[indexs],
       check: !arrs[indexs].check
     }
-    let a = JSON.stringify(arrs);
-    localStorage.setItem('list', a);
+
   }
 
   // _---------------------
+  //double click show input
   handTogger = async (id, value) => {
     await this.setState({
       toggle: {
@@ -106,10 +112,10 @@ class Todo extends Component {
     })
 
     this.focusRef.current.focus();
-
   }
 
   // -------------
+  //value fix
   onValueFix = e => {
     let value = e.target.value;
     this.setState({
@@ -117,6 +123,7 @@ class Todo extends Component {
     });
   }
 
+  //submit Fix
   submitFix = e => {
     const { valueFix, num, toggle } = this.state;
     e.preventDefault();
@@ -136,8 +143,7 @@ class Todo extends Component {
         num: arr
       });
 
-      let a = JSON.stringify(arr);
-      localStorage.setItem('list', a);
+      this.pushArr(arr);
     }
 
     this.setState({
@@ -150,6 +156,7 @@ class Todo extends Component {
     // ẩn input
   }
 
+  //outfocus 
   an = x => {
     const { valueFix, num, toggle } = this.state;
     if (valueFix.trim() !== "") {
@@ -166,6 +173,7 @@ class Todo extends Component {
       this.setState({
         num: arr
       })
+
       let a = JSON.stringify(arr);
       localStorage.setItem('list', a);
     }
@@ -176,11 +184,10 @@ class Todo extends Component {
         id: null
       }
     });
-
   }
 
   // -----------footer
-
+  //đã hoàn thành
   handeDone = () => {
     let c = JSON.parse(localStorage.getItem("list"));
     let arr = c.filter(x => {
@@ -192,6 +199,7 @@ class Todo extends Component {
     })
   }
 
+  //chưa xong
   handeUfinished = () => {
     let c = JSON.parse(localStorage.getItem("list"));
     let arr = c.filter(x => {
@@ -203,6 +211,7 @@ class Todo extends Component {
     })
   }
 
+  //xóa
   handeDelete = () => {
     let c = JSON.parse(localStorage.getItem("list"));
     let arr = c.filter(x => {
@@ -213,15 +222,29 @@ class Todo extends Component {
       num: arr
     });
 
-    let a = JSON.stringify(arr);
-    localStorage.setItem('list', a);
+    this.pushArr(arr);
   }
 
+  //show all
   handeAll = () => {
     let c = JSON.parse(localStorage.getItem("list"));
     this.setState({
       num: c
     })
+  }
+
+
+  //delete one
+  handeDeleteOne = (id) => {
+    let c = JSON.parse(localStorage.getItem("list"));
+    let index = c.findIndex(x => x.id === id);
+    let arr = [...c];
+    arr.splice(index, 1)
+    this.setState({
+      num: arr
+    });
+
+    this.pushArr(arr);
   }
 
   show = () => {
@@ -251,6 +274,7 @@ class Todo extends Component {
                 </form>
             }
           </div>
+          <i className="fas fa-times" onClick={() => this.handeDeleteOne(key.id)}></i>
         </div >
       )
     })
@@ -259,6 +283,7 @@ class Todo extends Component {
 
 
   render() {
+
     return (
       <div className="container">
         <Header handlerValue={this.handlerValues} />

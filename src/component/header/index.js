@@ -4,9 +4,14 @@ import React, { Component } from 'react';
 class Header extends Component {
   constructor(props) {
     super(props);
+    this.refFocus = React.createRef();
     this.state = {
       text: ""
     }
+  }
+
+  componentDidMount() {
+    this.refFocus.current.focus();
   }
 
   handeValue = (e) => {
@@ -35,7 +40,7 @@ class Header extends Component {
     return (
       <>
         <form onSubmit={this.handlerSubmit} className="submit_form" >
-          <input type="text" placeholder="Mời nhập..." className="ip_submit" name="ip" required value={text} onChange={this.handeValue} />
+          <input ref={this.refFocus} autoComplete="off" type="text" placeholder="Mời nhập..." className="ip_submit" name="ip" required value={text} onChange={this.handeValue} />
         </form>
       </>
     );
