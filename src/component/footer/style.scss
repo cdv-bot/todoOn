@@ -1,0 +1,24 @@
+.bt {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  button {
+    border-radius: 2px;
+    border: 1px solid rgb(51, 19, 19);
+    padding: 1px 3px;
+    margin-left: 5px;
+    cursor: pointer;
+    &:focus {
+      outline: none;
+      border: 1px solid rgb(121, 100, 74);
+    }
+    &:nth-of-type(4) {
+      margin-top: 5px;
+      margin-left: 0;
+    }
+    &:nth-of-type(1) {
+      margin-left: 0;
+    }
+  }
+}

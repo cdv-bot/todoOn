@@ -1,23 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
 
+import React from 'react';
+import './App.css';
+import Todo from './component/list_todo';
 function App() {
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Todo />
+      <div className="hd">
+        <span>
+          double click : Để chỉnh sửa.
+        </span>
+        <span>
+          click : Đánh dấu hoàn thành công việc.
+        </span>
+        <span>
+          Đã hoàn thành : Hiện các mục đã hoàn thành công việc.
+        </span>
+        <span>
+          Chưa hoàn thành : Hiện các việc chưa hoàn thành.
+        </span>
+        <span>
+          Xóa đã hoàn thành : Xóa các mục đã hoàn thành.
+        </span>
+      </div>
     </div>
   );
 }
