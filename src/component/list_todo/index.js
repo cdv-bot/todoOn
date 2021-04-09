@@ -73,17 +73,20 @@ class Todo extends Component {
     const { num } = this.state;
     let index = num.findIndex(x => {
       return x.id === id;
-    })
-    let arr = [...num];
+    });
 
+
+    let arr = [...num];
     arr[index] = {
       ...arr[index],
       check: !arr[index].check
     }
 
+
     this.setState({
       num: arr
     })
+
 
     let indexs = c.findIndex(x => {
       return x.id === id;
@@ -94,6 +97,8 @@ class Todo extends Component {
       ...arrs[indexs],
       check: !arrs[indexs].check
     }
+
+    this.pushArr(arrs);
 
   }
 
@@ -257,7 +262,7 @@ class Todo extends Component {
     arr = sort.map((key, index) => {
       return (
         <div key={index} className="show_check" >
-          <div id={key.id} onChange={() => this.handlerCheck(key.id)} onClick={() => this.handlerCheck(key.id)} >
+          <div id={key.id} onClick={() => this.handlerCheck(key.id)} >
             {
               (key.check) ?
                 <i className="fas fa-check-square icon icon_top" ></i>
