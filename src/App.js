@@ -7,7 +7,7 @@ function App() {
   return (
     <div className="App">
       <Todo />
-      <div className="hd">
+      {/* <div className="hd">
         <span>
           double click : Để chỉnh sửa.
         </span>
@@ -23,7 +23,7 @@ function App() {
         <span>
           Xóa đã hoàn thành : Xóa các mục đã hoàn thành.
         </span>
-      </div>
+      </div> */}
     </div>
   );
 }

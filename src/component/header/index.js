@@ -1,5 +1,6 @@
 import './style.scss';
 import React, { Component } from 'react';
+import productApi from '../apis/productsApi';
 
 class Header extends Component {
   constructor(props) {
@@ -14,18 +15,23 @@ class Header extends Component {
     this.refFocus.current.focus();
   }
 
-  handeValue = (e) => {
+  handleValue = (e) => {
     const value = e.target.value;
     this.setState({
       text: value
     });
   }
 
-  handlerSubmit = e => {
+  handleSubmit = e => {
     const { text } = this.state;
     e.preventDefault();
     if (text.trim() !== "") {
-      this.props.handlerValue(text)
+      productApi.setAdd({
+        content: text
+      }).then(data => {
+        this.props.handlerValue(data)
+      })
+
       this.setState({
         text: ""
       });
@@ -39,8 +45,11 @@ class Header extends Component {
     const { text } = this.state;
     return (
       <>
-        <form onSubmit={this.handlerSubmit} className="submit_form" >
-          <input ref={this.refFocus} autoComplete="off" type="text" placeholder="Mời nhập..." className="ip_submit" name="ip" required value={text} onChange={this.handeValue} />
+        <form onSubmit={this.handleSubmit} className="submit_form" >
+          <input ref={this.refFocus} autoComplete="off" type="text" placeholder="Mời nhập..." className="ip_submit" name="ip" required value={text} onChange={this.handleValue} />
+          <button type="submit" className="bt_submit">
+            <i className="fas fa-plus icons"></i>
+          </button>
         </form>
       </>
     );

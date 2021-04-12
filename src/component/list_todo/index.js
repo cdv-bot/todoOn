@@ -1,105 +1,64 @@
+import React, { Component } from 'react';
+import productApi from '../apis/productsApi';
 import Footer from '../footer';
 import Header from '../header';
 import './style.scss';
 
-import React, { Component } from 'react';
 
 class Todo extends Component {
   constructor(props) {
     super(props);
     this.focusRef = React.createRef();
-    let list = JSON.parse(localStorage.getItem("list"));
+
     this.state = {
-      num: list || [],
+      num: [],
+      deleteId: null,
       toggle: {
         check: true,
         id: null
       },
-      valueFix: ""
-
+      valueFix: "",
+      count: 0,
+      id: null,
+      sumList: 0
     }
   }
 
-  pushArr = arrs => {
-    let a = JSON.stringify(arrs);
-    localStorage.setItem('list', a);
+  componentDidMount() {
+    productApi.getList().then(x => {
+      this.setState({
+        num: x
+      })
+    });
   }
+
 
   // thêm value
-  handlerValues = x => {
+  handleValues = async x => {
     const { num } = this.state;
-    let c = JSON.parse(localStorage.getItem("list"));
-
-    if (num.length === 0) {
-      let arr = [];
-      let id = 1;
-      let obj = {
-        id: id,
-        value: x,
-        check: false
-      }
-      arr.push(obj);
-
-      this.pushArr(arr);
-
-      this.setState({
-        num: arr
-      });
-
-    } else {
-      let numId = c.length;
-      let id = c[numId - 1].id + 1;
-      let arr = [...c];
-      let obj = {
-        id: id,
-        value: x,
-        check: false
-      }
-      arr.push(obj);
-
-      this.pushArr(arr);
-
-      this.setState({
-        num: arr
-      });
-
-    }
+    let arr = [...num, x];
+    this.setState({
+      num: arr
+    });
+    this.handeAll();
   }
 
   //hoàn thành
-  handlerCheck = id => {
-    let c = JSON.parse(localStorage.getItem("list"));
-
-    const { num } = this.state;
-    let index = num.findIndex(x => {
-      return x.id === id;
-    });
-
-
-    let arr = [...num];
-    arr[index] = {
-      ...arr[index],
-      check: !arr[index].check
+  handleCheck = async (id, check) => {
+    if (check === "1") {
+      check = 0;
     }
-
+    if (check === "0") {
+      check = 1;
+    }
+    let data = await productApi.endpoint({
+      id,
+      check: check
+    })
 
     this.setState({
-      num: arr
+      num: data
     })
-
-
-    let indexs = c.findIndex(x => {
-      return x.id === id;
-    })
-    let arrs = [...c];
-
-    arrs[indexs] = {
-      ...arrs[indexs],
-      check: !arrs[indexs].check
-    }
-
-    this.pushArr(arrs);
-
   }
 
   // _---------------------
@@ -129,157 +88,181 @@ class Todo extends Component {
   }
 
   //submit Fix
-  submitFix = e => {
-    const { valueFix, num, toggle } = this.state;
+  submitFix = async e => {
+    const { valueFix, toggle } = this.state;
     e.preventDefault();
+
     if (valueFix.trim() !== "") {
-      let index = num.findIndex(x => {
-        return x.id === toggle.id;
+      let data = await productApi.updateList({
+        content: valueFix,
+        id: toggle.id
       });
-
-      let arr = [...num];
-      arr[index] = {
-        ...arr[index],
-        value: valueFix,
-        check: false
-      }
-
       this.setState({
-        num: arr
+        num: data
       });
 
-      this.pushArr(arr);
     }
-
-    this.setState({
-      toggle: {
-        check: false,
-        id: null
-      }
-    })
-
-    // ẩn input
-  }
-
-  //outfocus 
-  an = x => {
-    const { valueFix, num, toggle } = this.state;
-    if (valueFix.trim() !== "") {
-      let index = num.findIndex(x => {
-        return x.id === toggle.id;
-      });
-
-      let arr = [...num];
-      arr[index] = {
-        ...arr[index],
-        value: valueFix,
-        check: false
-      }
-      this.setState({
-        num: arr
-      })
-
-      let a = JSON.stringify(arr);
-      localStorage.setItem('list', a);
-    }
-
     this.setState({
       toggle: {
         check: false,
         id: null
       }
     });
-  }
-
-  // -----------footer
-  //đã hoàn thành
-  handeDone = () => {
-    let c = JSON.parse(localStorage.getItem("list"));
-    let arr = c.filter(x => {
-      return x.check === true;
-    });
-
-    this.setState({
-      num: arr
-    })
-  }
-
-  //chưa xong
-  handeUfinished = () => {
-    let c = JSON.parse(localStorage.getItem("list"));
-    let arr = c.filter(x => {
-      return x.check === false;
-    });
-
-    this.setState({
-      num: arr
-    })
-  }
-
-  //xóa
-  handeDelete = () => {
-    let c = JSON.parse(localStorage.getItem("list"));
-    let arr = c.filter(x => {
-      return x.check === false;
-    });
-
-    this.setState({
-      num: arr
-    });
-
-    this.pushArr(arr);
-  }
-
-  //show all
-  handeAll = () => {
-    let c = JSON.parse(localStorage.getItem("list"));
-    this.setState({
-      num: c
-    })
   }
 
 
   //delete one
-  handeDeleteOne = (id) => {
-    let c = JSON.parse(localStorage.getItem("list"));
-    let index = c.findIndex(x => x.id === id);
-    let arr = [...c];
-    arr.splice(index, 1)
+  handeDeleteOne = async (id) => {
+    let data = await productApi.delete({
+      id
+    });
     this.setState({
-      num: arr
+      deleteId: id
+    })
+    setTimeout(() => {
+      this.setState({
+        num: data,
+        deleteId: null
+      });
+    }, 500)
+  }
+
+
+  //outfocus 
+  outFocus = async x => {
+    const { valueFix, toggle } = this.state;
+    if (valueFix.trim() !== "") {
+      let data = await productApi.updateList({
+        content: valueFix,
+        id: toggle.id
+      });
+
+      this.setState({
+        num: data,
+        toggle: {
+          check: false,
+          id: null
+        }
+      });
+    } else {
+      this.setState({
+        toggle: {
+          check: false,
+          id: null
+        }
+      });
+    }
+  }
+
+  // -----------footer
+  //đã hoàn thành
+  handeDone = async () => {
+    let data = await productApi.checked({
+      check: 1
     });
 
-    this.pushArr(arr);
+    this.setState({
+      num: data
+    })
+  }
+
+  //chưa xong
+  handeUfinished = async () => {
+    let data = await productApi.checked({
+      check: 0
+    });
+
+    this.setState({
+      num: data
+    })
+  }
+
+  //xóa
+  handeDelete = async () => {
+    let data = await productApi.deleteAll({
+      check: 1
+    });
+    this.setState({
+      num: data
+    })
+  }
+
+  //show all
+  handeAll = async () => {
+    let data = await productApi.getList();
+    this.setState({
+      num: data
+    })
+  }
+
+
+  handleTime = (day) => {
+
+    let today = new Date();
+    let inday = new Date(day);
+
+    let nam = today.getFullYear() - inday.getFullYear();
+    let month = today.getMonth() - inday.getMonth();
+    let days = today.getDay() - inday.getDay();
+    let hours = today.getHours() - inday.getHours();
+    let min = today.getMinutes() - inday.getMinutes();
+    let sec = today.getSeconds() - inday.getSeconds();
+
+    if (nam > 0) {
+      return ` ${nam} năm`;
+    }
+    if (month > 0) {
+      return `${month} tháng`;
+    }
+    if (days > 0) {
+      return `${days} ngày`;
+    }
+    if (hours > 0) {
+      return `${hours} giờ`;
+    }
+    if (min > 0) {
+      return `${min} phút`;
+    }
+    if (sec > 0) {
+      return `${sec} giây`;
+    } else {
+      return `bây giờ`
+    }
   }
 
   show = () => {
-    const { valueFix, num, toggle } = this.state;
+    const { valueFix, num, toggle, deleteId } = this.state;
     let sort = [...num];
+    if (sort.length === 0) return <div className="No_list">Không có mục nào !!!</div>;
     sort.sort(function (a, b) {
       return b.id - a.id;
     });
     let arr = [];
     arr = sort.map((key, index) => {
       return (
-        <div key={index} className="show_check" >
-          <div id={key.id} onClick={() => this.handlerCheck(key.id)} >
+        <div key={index} className={`show_check ${deleteId === key.id ? "tranfrom" : ""}`}>
+          <div id={key.id} onClick={() => this.handleCheck(key.id, key.checks)} >
             {
-              (key.check) ?
+              (key.checks !== "0" ? true : false) ?
                 <i className="fas fa-check-square icon icon_top" ></i>
                 : <i className="fas fa-check-square icon " ></i>
             }
           </div>
-          <div className="list_data" onDoubleClick={() => this.handTogger(key.id, key.value)} >
+          <div className="list_data" onDoubleClick={() => this.handTogger(key.id, key.content)} >
             {
+              // toggle.id !== key.id
               (toggle.id !== key.id) ?
-                // onClick = {() => this.handlerCheck(key.id)}
-                <label onDoubleClick={() => this.handTogger(key.id, key.value)} className={`text_data ${key.check ? 'unfinished' : ''}`}>{key.value}</label>
-                : <form onSubmit={this.submitFix}>
-                  <input className="ip_hide" type="text" ref={this.focusRef} value={valueFix} onBlur={() => this.an(key.id)} onChange={this.onValueFix} />
+                // onClick = {() => this.handleCheck(key.id)}
+                <div className="text_time">
+                  <label className={`text_data ${key.checks === '1' ? 'unfinished' : ''}`}>{key.content}</label>
+                  <span>{this.handleTime(key.day)}</span>
+                </div>
+                : <form onSubmit={this.submitFix} className="form_fix">
+                  <input className="ip_hide" type="text" ref={this.focusRef} value={valueFix} onBlur={() => this.outFocus(key.id)} onChange={this.onValueFix} />
                 </form>
             }
           </div>
-          <i className="fas fa-times" onClick={() => this.handeDeleteOne(key.id)}></i>
+          <i className="far fa-trash-alt icon_delete" onClick={() => this.handeDeleteOne(key.id)}></i>
         </div >
       )
     })
@@ -288,18 +271,23 @@ class Todo extends Component {
 
 
   render() {
-
     return (
-      <div className="container">
-        <Header handlerValue={this.handlerValues} />
-        <div className="content" >
-          <div className="positon">
-            {
-              this.show()
-            }
+      <div className="All">
+        <div className="input_add">
+          <Header handlerValue={this.handleValues} />
+        </div>
+        <div className="container">
+          <div className="content" >
+            <div className="positon">
+              {
+                this.show()
+              }
+            </div>
+          </div>
+          <div className="bt_check">
+            <Footer sumCount={this.state.num} done={this.handeDone} unfinished={this.handeUfinished} deletes={this.handeDelete} all={this.handeAll} />
           </div>
         </div>
-        <Footer done={this.handeDone} unfinished={this.handeUfinished} deletes={this.handeDelete} all={this.handeAll} />
       </div>
     );
   }
